@@ -135,13 +135,21 @@ objects=[];
 
 gameActive=true;
 
-document.getElementById("menu").style.opacity="0";
+document.getElementById("score").innerText=score;
+
+const menu=document.getElementById("menu");
+
+menu.style.opacity="0";
 
 setTimeout(()=>{
 
-document.getElementById("menu").style.display="none";
+menu.style.display="none";
 
-},500);
+},400);
+
+document.querySelector("h1").innerText="SPACE ENERGY COLLECTOR";
+
+document.querySelector("p").innerText="Colectează cristalele energetice și evită meteoriții";
 
 spawnObjects();
 
@@ -207,15 +215,18 @@ const menu=document.getElementById("menu");
 
 menu.style.display="flex";
 
-setTimeout(()=>menu.style.opacity="1",10);
+setTimeout(()=>{
+
+menu.style.opacity="1";
+
+},50);
 
 document.querySelector("h1").innerText="MISSION FAILED";
 
-document.querySelector("p").innerText=`Energy collected: ${score}`;
+document.querySelector("p").innerText="Energy collected: "+score;
 
 }
-
-canvas.addEventListener("mousemove",(e)=>{
+window.addEventListener("mousemove",(e)=>{
 
 player.x=e.clientX;
 
