@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+<meta charset="UTF-8">
+<title>Space Energy Collector</title>
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div id="ui">ENERGY: <span id="score">0</span></div>
+
+<div id="menu">
+    <div class="title-container">
+        <h1>SPACE ENERGY COLLECTOR</h1>
+        <p>Colectează cristalele energetice și evită meteoriții</p>
+        <button onclick="initGame()">Start Mission</button>
+    </div>
+</div>
+
+<canvas id="game"></canvas>
+
+<script>
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+
+// Import grafică player
+const droneImg = new Image();
+droneImg.src = "https://cdn-icons-png.flaticon.com/512/744/744465.png";
+
+let score = 0;
+let gameActive = false;
+let frameCounter = 0;
+
+let player = {x:0,y:0,size:30};
+
+let objects = [];
+
+// Obiect animație
+class SpaceObject{
+
+    constructor(type){
+
+        this.type = type;
+        this.x = Math.random()*canvas.width;
+        this.y = -40;
+
+        this.size = type==="energy"?15:25;
+
+        this.speed = 2 + Math.random()*3;
+
+        this.rotation = 0;
+    }
+
+    update(){
+
+        this.y += this.speed;
+
+        this.rotation += 0.04;
+
+    }
+
+    draw(){
+
+        ctx.save();
+
+        ctx.translate(this.x,this.y);
+
+        ctx.rotate(this.rotation);
+
+        if(this.type==="energy"){
+
+            ctx.fillStyle="#5bd9ff";
+
+            ctx.beginPath();
+
+            ctx.arc(0,0,this.size,0,Math.PI*2);
+
+            ctx.fill();
+
+        }
+
+        else{
+
+            ctx.fillStyle="#ff7b00";
+
+            ctx.beginPath();
+
+            ctx.moveTo(0,-this.size);
+
+            ctx.lineTo(this.size,this.size);
+
+            ctx.lineTo(-this.size,this.size);
+
+            ctx.fill();
+
+        }
+
+        ctx.restore();
+
+    }
+
+}
+
+function resize(){
+
+canvas.width=window.innerWidth;
+
+canvas.height=window.innerHeight;
+
+}
+
+window.addEventListener("resize",resize);
+
+resize();
+
+// spawn obiecte
+function spawnObjects(){
+
+if(!gameActive)return;
+
+objects.push(new SpaceObject(Math.random()>0.3?"energy":"meteor"));
+
+let next=Math.max(200,1000-score*2);
+
+setTimeout(spawnObjects,next);
+
+}
+
+function initGame(){
+
+score=0;
+
+objects=[];
+
+gameActive=true;
+
+document.getElementById("menu").style.opacity="0";
+
+setTimeout(()=>{
+
+document.getElementById("menu").style.display="none";
+
+},500);
+
+spawnObjects();
+
+animate();
+
+}
+
+function animate(){
+
+if(!gameActive)return;
+
+frameCounter++;
+
+ctx.fillStyle="rgba(0,0,20,0.25)";
+
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+ctx.drawImage(droneImg,player.x-20,player.y-20,40,40);
+
+for(let i=objects.length-1;i>=0;i--){
+
+let o=objects[i];
+
+o.update();
+
+o.draw();
+
+let dist=Math.hypot(o.x-player.x,o.y-player.y);
+
+if(dist<o.size+15){
+
+if(o.type==="energy"){
+
+score+=10;
+
+objects.splice(i,1);
+
+document.getElementById("score").innerText=score;
+
+}
+
+else{
+
+gameOver();
+
+}
+
+}
+
+if(o.y>canvas.height+50)objects.splice(i,1);
+
+}
+
+requestAnimationFrame(animate);
+
+}
+
+function gameOver(){
+
+gameActive=false;
+
+const menu=document.getElementById("menu");
+
+menu.style.display="flex";
+
+setTimeout(()=>menu.style.opacity="1",10);
+
+document.querySelector("h1").innerText="MISSION FAILED";
+
+document.querySelector("p").innerText=`Energy collected: ${score}`;
+
+}
+
+canvas.addEventListener("mousemove",(e)=>{
+
+player.x=e.clientX;
+
+player.y=e.clientY;
+
+});
+</script>
+
+</body>
+</html>
